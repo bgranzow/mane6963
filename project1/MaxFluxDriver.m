@@ -1,5 +1,7 @@
-  function MaxFluxDriver(L,Np,Ttop,Tbot,kappa,hmin,hmax)
-% function MaxFluxDriver(L,Np,Ttop,Tbot,kappa,hmin,hmax)
+  function p = MaxFluxDriver(L,Np,Ttop,Tbot,kappa,hmin,hmax)
+% function p = MaxFluxDriver(L,Np,Ttop,Tbot,kappa,hmin,hmax)
+% Brief: Driver to compute a surface that maximizes flux for
+% a heat exchanger.
 % Inputs:
 %   L - A scalar value of the length of the domain.
 %   Np - The number of design parameters.
@@ -8,6 +10,8 @@
 %   kappa - The thermal conductivity of the exchanger (steel).
 %   hmin - The minimum height of the top parameterized surface.
 %   hmax - The maximum height of the top parameterized surface.
+% Output:
+%   p - An [Np,1] column vector of design parameters.
 
 % Choose the grid spacing to accurately account for geometry.
 Nx = 2*(Np-1)*15;
@@ -37,16 +41,5 @@ set(gca, 'FontSize', 20, 'LineWidth', 2)
 title('Upper surface geometry')
 xlabel('x');
 ylabel('h(x,p)');
-pause
-
-% Print a summary of the percentage improvement over the nominal value
-computed = 1.0/f(p);
-nominal = 6.93069307e+03;
-increase = 100*(computed-nominal)/nominal;
-fprintf('Np | Computed flux  |  Nominal flux  | percent increase \n')
-fprintf('------------------------------------------------\n')
-fprintf('%d  | %.8e | %.8e | %.4e \n', Np, computed, nominal, increase)
-
-return
 
 end

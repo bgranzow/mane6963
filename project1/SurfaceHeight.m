@@ -28,7 +28,5 @@ for k=2:Np
     h = h + p(k).*sin(2.0*pi*(k-1).*x./L).^2;
 end
 
-return
-
 end
 

@@ -29,6 +29,4 @@ cineq = [c1;c2];
 % Return no equality constraints.
 ceq = [];
 
-return
-
 end
