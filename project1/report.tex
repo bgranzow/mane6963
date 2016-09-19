@@ -130,19 +130,18 @@ surface,
 we choose a uniform grid of $N_x = N_y = 15*2(N_p-1)$
 finite volumes in the $x$ and $y$ directions, so that the finest mode
 of the geometry is resolved by at least $15$ finite volumes.
-
 Once the temperature is computed everywhere in the domain,
 the flux
 \begin{equation}
 f(\boldsymbol{p}) = \kappa \int_0^L
 \frac{\partial T(x,y=0,h(x,\boldsymbol{p}))}{\partial y} \text{d} x
 \end{equation}
-from the air to the water is approximated
-with a finite-difference approximation.
+from the air to the water is approximated with a first order
+finite-difference scheme.
 
 \section{Optimization problem statement}
 
-Given the definitions of the surface height parameterization
+Given the definitions of the surface height
 $h(x, \boldsymbol{p})$ and the flux per unit area $f(\boldsymbol{p})$
 from previous sections, the constrained optimization problem we wish
 to solve is: 
@@ -155,18 +154,18 @@ to solve is:
 \end{aligned}
 \label{eq:optimize}
 \end{equation}
-Here, we have constrained the surface height to be greater than
+Note that by minimizing the inverse of the flux, we are in fact maximizing
+the flux. Here, we have constrained the surface height to be greater than
 or equal to a minimum value $h_{\text{min}}$ and less than or equal
 to a maximum value $h_{\text{max}}$. These constraints are
-implemented in the routine \textsc{NonlinearConstraints.m}
-to be passed to Matlab's \textsc{fmincon} routine as nonlinear
-constraints.
+implemented in the routine \textsc{NonlinearConstraints.m} as
+nonlinear constraints to be used in Matlab's  \textsc{fmincon} routine.
 
 \section{Optimization methods}
 
 We utilize Matlab's \textsc{fmincon} routine to solve the
-optimization routine \eqref{eq:optimize}. This routine performs
-gradient-based optimization, using a finite-difference approximation
+optimization problem \eqref{eq:optimize}. By default, this routine performs
+gradient-based optimization with a forward finite-difference approximation
 of the gradient $\nabla f$. We provide \textsc{fmincon} with the
 following options:
 \begin{verbatim}
@@ -177,12 +176,13 @@ optns = optimoptions(@fmincon,...
 Here we have chosen to use a sequentially quadratic programming
 algorithm for the optimization routine, where we assume that the
 objective function $f(\boldsymbol{p})$ is twice continuously
-differentiable. The Matlab routine \textsc{MaxFluxDriver.m} solves
+differentiable. We utilize \textsc{fmincon}'s default convergence
+tolerances, as they are sufficiently accurate for our purposes.
+The Matlab routine \textsc{MaxFluxDriver.m} solves
 the optimization problem through a call to \textsc{fmincon}. Note
 that we define the objective function $f = f(\boldsymbol{p})$ as
-a function of the surface height parameterization
-$f = f(h(x, \boldsymbol{p}))$ on line 26 of
-\textsc{MaxFluxDriver.m}.
+a function of the surface height $f = f(h(x, \boldsymbol{p}))$ on
+line 26 of \textsc{MaxFluxDriver.m}.
 
 \section{Results}
 
@@ -232,7 +232,11 @@ p =
    0.040441876010831
 \end{verbatim}
 The final geometry of the upper surface is shown in Figure
-\ref{fig:geometry}.
+\ref{fig:geometry}. We note that only the highest order mode
+$p_5$ contributes significantly to the complexity of the geometry
+of the upper surface. This result is congruent with the engineering
+intuition that the geometry that maximizes the flux will be the one with
+the greatest surface area.
 
 \begin{figure}[hbt]
 \centering
@@ -251,14 +255,14 @@ The final geometry of the upper surface is shown in Figure
 The Matlab routine \textsc{ConvergenceDriver.m} was used to
 perform a mesh convergence analysis on the optimal geometry
 to ensure the accuracy of the computed flux value. The flux
-was computed using uniform spacings of $N_x = N_y = {20,40,80,160,32,640}$
-finite volumes in the $x$ and $y$ directions. The routine
+was computed using uniform numbers $N_x = N_y = \{20,40,80,160,32,640\}$
+of finite volumes in the $x$ and $y$ directions. The routine
 \textsc{ConvergenceDriver.m} was called as:
 \begin{verbatim}
 >> n = [20,40,60,80,160,320,640]';
->> f = ConvergenceDriver(n,L,p,kappa,Ttop,Tbot);
+>> f = ConvergenceDriver(n,L,p,kappa,Tair,Twater);
 \end{verbatim}
-The flux values versus grid spacing are shown in Figure
+The computed flux values versus grid spacing are shown in Figure
 \ref{fig:flux}. The relative percent difference between the flux
 evaluated with $320$x$320$ volumes and $640$x$640$ volumes
 is around $0.9\%$. Thus, we conclude that the flux value computed
@@ -267,20 +271,21 @@ The computed flux value at this fine grid spacing is
 \begin{equation}
 f = 25,827.93 \text{W}/(\text{m} \degree \text{C}),
 \end{equation}
-which is about a $260\%$ increase over the nominal value
+which is approximately a $260\%$ increase over the nominal value
 of $7,000 \text{W}/(\text{m} \degree \text{C})$
 for a heat exchanger with a flat surface at $h = 0.01$m.
 
 \section{Conclusions}
 
 We have determined the shape of a heat exchanger
-that optimized flux per unit area using the gradient-based
+that optimizes the  flux per unit area from one surface of the heat
+exchanger to the other using the gradient-based
 optimization capabilities of Matlab's \textsc{fmincon} routine.
 The accuracy of the flux value for this optimized geometry was verified
 with a mesh convergence study, and a $260\%$ increase over the nominal
-value. The shape of the final geometry is consistent with engineering
-intuition, that the maximal flux will occur with the greatest
-surface area.
+value. The shape of the final geometry is consistent with the engineering
+intuition that the maximal flux for the heat exchanger will occur
+with the greatest surface surface area.
 
 \newpage
 
