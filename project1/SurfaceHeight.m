@@ -9,7 +9,7 @@
 %   h - An [Nx+1,1] column vector of height values evaluated at x(i).
 % Details:
 %   This function returns the surface parameterization given by
-%   h(i) = p(1) + sum_{k=1}^{Np} p(k) sin(2 pi (k-1) x(i) / L)
+%   h(i) = p(1) + sum_{k=1}^{Np} p(k) [sin(2 pi (k-1) x(i) / L)]^2
 
 % Validate the inputs.
 assert(isscalar(L));
