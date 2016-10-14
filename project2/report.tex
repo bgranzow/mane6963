@@ -35,6 +35,8 @@ numberstyle=\tiny\color[rgb]{0.5,0.5,0.5},
 stepnumber=1
 }
 
+\newcommand{\bs}[1] {\boldsymbol{#1}}
+
 \title{Design of an optimal wing spar\\MANE 6963 - Project 2}
 \author{ID: 2168}
 \date{}
@@ -42,23 +44,39 @@ stepnumber=1
 \begin{document}
 
 \maketitle
+\tableofcontents
+\newpage
 
 \section{Executive summary}
-
-In this report, we investigate the optimal design of a spar
-as the primary support for the wing of an aircraft. Our
-main objective is to minimize the weight of the wing spar
-subject to specific design constraints, design assumptions,
-and operational assumptions about the aircraft.
 
 \begin{figure}[hbt]
 \centering
 \includegraphics[width=0.6\textwidth]{spar}
 \label{fig:spar}
-\caption{Wing and illustration of spar geometry}
+\caption{Wing (dotted lines) and illustration of spar geometry}
 \end{figure}
 
+In this report, we investigate the optimal design of a
+spar as the primary support for the wing of an aircraft.
+Figure \ref{fig:spar} shows an illustration of the spar
+that is to be designed. Our main objective is to minimize the
+weight (and thus the mass) of the wing spar subject to
+engineering operational assumptions about the aircraft,
+engineering design assumptions, and aircraft
+operational assumptions. These assumptions and
+constraints are outlined below:
+
 \subsection{Aircraft operational assumptions}
+
+We assume that the total mass of the aircraft
+is $m_{\text{plane}} = 500$ kg and that the weight
+of the plane is equally supported by two wings.
+Additionally, we assume that the plane is operating
+at a $2.5$ g maneuver, where the span-wise force
+distribution acting on the wing (and thus on the spar)
+varies linearly, vanishing at the wing tip. The
+distribution of this force per unit area $q(x)$
+acting on the spar is shown in Figure \ref{fig:load}.
 
 \begin{figure}[hbt]
 \centering
@@ -67,27 +85,15 @@ and operational assumptions about the aircraft.
 \label{fig:load}
 \end{figure}
 
-We assume that the total mass of the aircraft is
-$m_{\text{plane}} = 500$ kg and that the plane
-is equally supported by two wings. 
-Additionally, we assume that the wing semi-span,
-which is also the length of the spar, is
-$L = 7.5$ m. Finally,
-we assume that the plane will be operating at
-a $2.5$ g maneuver and that the span-wise force
-distribution acting on the wing
-(and thus on the spar) during this maneuver
-is linearly varying, vanishing at the wing tip.
-The distribution of the force per unit area $q(x)$
-acting on the spar is shown in Figure \ref{fig:load}.
+\subsection{Engineering design assumptions}
 
-\subsection{Design assumptions}
-
-We assume that the spar will be made of a composite
-carbon fiber material with the material properties
-shown in Figure \ref{fig:materials},
-where the ultimate yield strength is equal in tension
-and in compression.
+We assume that the wing semi-span $L$ is $7.5$ m,
+and that the spar supporting the wing will be made
+of a composite fiber material. The material properties
+of the composite are listed in Figure \ref{fig:materials}.
+Additionally, we assume that the cross-section of
+the spar in the $yz$ plane is a circular annulus,
+as shown in Figure \ref{fig:annulus}.
 
 \begin{figure}[hbt]
 \centering
@@ -102,36 +108,66 @@ Ultimate yield strength $(Y)$ & $600$ MPa \\ \hline
 \label{fig:materials}
 \end{figure}
 
-The cross-sectional shape of the spar is assumed to a
-circular annulus, as shown in Figure \ref{fig:section}.
+\subsection{Engineering design constraints}
+
+Due to material manufacturing restraints, we
+assume that the inner radius of the spar at all
+points $r_{\text{in}} \geq 1$ cm, and that the
+inner and outer radii of the spar cannot be more
+than $2.5$mm apart, i.e.
+$r_{\text{out}} - r_{\text{in}} \geq 2.5$ mm.
+Because the spar must remain within the wing, we
+constrain the outer radius of the spar to be less
+than or equal to $5$ cm, i.e. $r_{\text{out}} \leq 5$cm.
+Finally, we stipulate that the normal stress at all
+span-wise locations in the be less than the yield
+strength, $\sigma \leq Y$, to maintain a safe design.
 
 \begin{figure}[hbt]
 \centering
 \includegraphics[width=0.3\textwidth]{annulus}
-\caption{Cross-section of the spar geometry}
-\label{fig:section}
+\caption{Annular cross-section of the spar geometry}
+\label{fig:annulus}
 \end{figure}
 
-\subsection{Design constraints}
+\subsection{Work done to achieve optimization goal}
+
+To achieve our optimization goal given the stated constraints
+we have:
+\begin{itemize}
+\item Determined a suitable geometry representation for the spar
+\item Implemented 
+\item Utilized a finite element analysis 
+\end{itemize}
 
 \section{Geometry representation}
+
+\section{Analysis methods}
+
+\section{Optimization problem statement}
+
+\section{Optimization methods}
+
+\section{Results}
+
+\section{Conclusions}
 
 \newpage
 
 \section{Appendix: code listings}
 
-\lstinputlisting[
-  style=matlab-style,
-  caption=CalcForce.m]{CalcForce.m}
-
-\lstinputlisting[
-  style=matlab-style,
-  caption=CalcMomentInertia.m]{CalcMomentInertia.m}
-
+\lstinputlisting[style=matlab-style,caption=CalcForce.m]{CalcForce.m}
+\lstinputlisting[style=matlab-style,caption=CalcMoment.m]{CalcMoment.m}
 \newpage
-
-\lstinputlisting[
-  style=matlab-style,
-  caption=CalcWeight.m]{CalcWeight.m}
+\lstinputlisting[style=matlab-style,caption=CalcMass.m]{CalcMass.m}
+\lstinputlisting[style=matlab-style,caption=ConstraintLower.m]{ConstraintLower.m}
+\newpage
+\lstinputlisting[style=matlab-style,caption=ConstraintUpper.m]{ConstraintUpper.m}
+\lstinputlisting[style=matlab-style,caption=ConstraintStress.m]{ConstraintStress.m}
+\newpage
+\lstinputlisting[style=matlab-style,caption=Obj.m]{Obj.m}
+\lstinputlisting[style=matlab-style,caption=Plotter.m]{Plotter.m}
+\newpage
+\lstinputlisting[style=matlab-style,caption=Driver.m]{Driver.m}
 
 \end{document}
