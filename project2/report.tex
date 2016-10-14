@@ -110,7 +110,7 @@ Ultimate yield strength $(Y)$ & $600$ MPa \\ \hline
 
 \subsection{Engineering design constraints}
 
-Due to material manufacturing restraints, we
+Due to material manufacturing constraints, we
 assume that the inner radius of the spar at all
 points $r_{\text{in}} \geq 1$ cm, and that the
 inner and outer radii of the spar cannot be more
@@ -132,15 +132,41 @@ strength, $\sigma \leq Y$, to maintain a safe design.
 
 \subsection{Work done to achieve optimization goal}
 
-To achieve our optimization goal given the stated constraints
-we have:
+To achieve the stated optimization goal subject to the above
+constraints and assumptions, we have:
 \begin{itemize}
 \item Determined a suitable geometry representation for the spar
-\item Implemented 
-\item Utilized a finite element analysis 
+\item Derived the appropriate force per unit length function
+$q(x)$ based on our design assumptions and implemented a Matlab
+method CalcForce.m that evaluates $q(x)$ at discrete points.
+\item Implemented a Matlab routine CalcMoment.m that computes
+the second moment of area at cross-sections of the spar geometry.
+\item Provided the functions CalcForce.m and CalcMoment.m to a
+finite element analysis computation to compute the normal stresses
+$\sigma$ at discrete grid locations along the spar.
+\item Implemented the Matlab routine CalcMass.m that computes
+the mass $m$ of the spar as a function of the design variables
+$\bs{p}$.
+\item Implemented the Matlab routine Obj.m which computes the
+mass objective function and its gradient with respect to the
+design parameters $\bs{p}$ using the complex-step method.
+\item Implemented the Matlab routines ConstraintLower.m,
+ConstraintUpper.m, and ConstraintStress.m to effectively
+impose the necessary constraints.
+\item Utilized Matlab's fmincon routine, along with the methods
+Obj.m, ConstraintLower.m, ConstraintUpper.m, and ConstraintStress.m,
+to determine an optimal spar geometry.
 \end{itemize}
 
+In the remainder of this report, the mathematical and
+implementation details of each item
+in the list above are sequentially discussed.
+Results of the optimization study are shown and finally
+conclusions are drawn. All Matlab routines named are listed
+in the Appendix.
+
 \section{Geometry representation}
+
 
 \section{Analysis methods}
 
