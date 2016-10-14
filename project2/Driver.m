@@ -40,4 +40,7 @@ nlcon   = @(p) ConstraintStress(sigma(p),Y);
 optns = optimoptions(@fmincon,...
     'Display','iter',...
     'Algorithm', 'sqp');
-p = fmincon(obj,p0,A,b,[],[],lbcon,[],nlcon,optns)
+p = fmincon(obj,p0,A,b,[],[],lbcon,[],nlcon,optns);
+
+% plot some groovy stuff
+Plotter(x,ri(p),ro(p),sigma(p));
