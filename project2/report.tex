@@ -154,7 +154,7 @@ the complex-step method.
 \item Implemented the Matlab routines ConstraintLower.m,
 ConstraintUpper.m, and ConstraintStress.m to effectively
 impose the necessary constraints.
-\item Utilized Matlab's fmincon routine, along with the methods
+\item Utilized Matlab's \emph{fmincon} routine, along with the methods
 Obj.m, ConstraintLower.m, ConstraintUpper.m, and ConstraintStress.m,
 to determine an optimal spar geometry.
 \end{itemize}
@@ -357,13 +357,22 @@ constraints are implemented in the Matlab routine
 ConstraintLower.m. The third constraint states that the
 outer radius $r^o$ must not exceed $5$ cm, and is implemented
 as a linear inequality constraint in the Matlab function
-ConstraintUpper.m. The final constraint prohibits the
+ConstraintUpper.m.
+
+The final constraint prohibits the
 stress $\sigma$ at all points in the domain from exceeding
 the yield strength $Y$ and is implemented as a nonlinear
 constraint in ConstraintStress.m. Note that we have scaled
 this nonlinear constraint by dividing both sides by the
 yield strength $Y$ so that all constraints are closer
-to the same order of magnitude. Additionally, note that
+to the same order of magnitude.
+Additionally, we compute the nonlinear
+constraint Jacobian on line 31 of ConstraintStress.m
+using the complex step method, where
+\begin{equation}
+[ \nabla c ]_{kj} = \frac{\partial \sigma_j / Y}{\partial p_k}
+\end{equation}
+Finally, note that
 nonlinear constraint is dependent on the stress results
 $\sigma_j$ obtained from the finite element analysis.
 
@@ -391,10 +400,15 @@ to be $h=1e-30$.
 We utilize gradient based optimization techniques through
 Matlab's \emph{fmincon} routine. We choose a
 sequentially quadratic programming algorithm.
+We choose Matlab's default convergence tolerances
+for \emph{fmincon} as they are suitably accurate
+for our purposes.
 Additionally, we ensure that we utilize the gradient
-determined by the complex-step method, rather than
+determined by the complex-step method and the
+nonlinear constraint Jacobian determined by the
+complex step method, rather than
 \emph{fmincon}'s own finite differencing schemes.
-This can be seen on line $46$ of Driver.m.
+This can be seen on lines $46$ and $47$ of Driver.m 
 
 \section{Results}
 
@@ -406,7 +420,7 @@ by this initial guess as the \emph{nominal} geometry.
 The convergence history for the optimization
 problem is shown in Figure \ref{fig:convergence}.
 
-\begin{figure}[hbt]
+\begin{figure}[hbt!]
 \small
 \centering
 \begin{verbatim}
@@ -426,7 +440,13 @@ problem is shown in Figure \ref{fig:convergence}.
 \label{fig:convergence}
 \end{figure}
 
-\begin{figure}[hbt]
+Note that
+the function call count \emph{F-count} is scaling directly
+with the number of iterations. This gives us confidence that
+\emph{fmincon} is utilizing the supplied objective gradient and
+the nonlinear constraint Jacobian.
+
+\begin{figure}[hbt!]
 \centering
 \begin{minipage}[b]{0.4\textwidth}
 \includegraphics[width=0.9\textwidth]{nominal_geom}
@@ -455,7 +475,7 @@ and $r^o \leq 5$ cm, respectively, are clearly
 satisfied, further increasing our confidence that
 the optimal geometry has been found.
 
-\begin{figure}[hbt]
+\begin{figure}[hbt!]
 \centering
 \begin{minipage}[b]{0.4\textwidth}
 \includegraphics[width=0.9\textwidth]{nominal_stress}
@@ -481,16 +501,6 @@ distribution along the $x$-axis begins to decrease
 at around $5$ m because, at this point, the
 inner radii constraint has been met, and can get
 no smaller.
-
-As a final verification step, we have modified the gradient
-output $g$ of the method Obj.m to simply return a
-gradient vector with each component set to the value $1$.
-This greatly affected the optimization convergence
-process (as one would expect), and gives us confidence
-that Matlab's \emph{fmincon} routine is actually
-utilizing the supplied gradient found via the complex-step
-method rather than using
-its own internal finite difference scheme.
 
 Finally, we note that the computed mass of the
 optimal spar geometry is found to be
