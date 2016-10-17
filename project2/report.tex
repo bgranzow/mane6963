@@ -120,8 +120,8 @@ Because the spar must remain within the wing, we
 constrain the outer radius $r^o$ of the spar to be less
 than or equal to $5$ cm.
 Finally, we stipulate that the normal stress $\sigma$ at all
-span-wise locations be less than the yield
-strength $Y$, to maintain a safe design.
+span-wise locations must be less than the yield
+strength $Y$ in order to maintain a safe design.
 
 \begin{figure}[hbt]
 \centering
@@ -163,7 +163,9 @@ In the remainder of this report, the mathematical and
 implementation details of each item
 in the list above are sequentially discussed.
 Results of the optimization study are shown and finally
-conclusions are drawn. All Matlab routines named are listed
+conclusions are drawn. The final optimal geometry shows a
+$62$ percent reduction in mass over a chosen nominal
+geometry. All Matlab routines named are listed
 in the Appendix.
 
 \section{Geometry parameterization}
@@ -196,7 +198,7 @@ has the layout
 \subsection{PDE Model}
 
 We model the deformation of the wing spar using Euler-Bernoulli
-beam theory.
+beam theory, represented by the PDE:
 \begin{equation}
 \frac{d^2}{d x^2}
 \left( E I_{yy} \frac{d^2 u}{dx^2} \right) =
@@ -205,8 +207,9 @@ q, \quad \forall x \in [0,L],
 \end{equation}
 where $I_{yy}$ is the second moment of inertia of the
 cross-section of the spar and $q$ is an applied load.
-We impose zero vertical or angular displacement boundary
-conditions:
+We impose zero vertical displacement and zero angular
+displacement boundary conditions where the spar connects
+to the fuselage:
 \begin{equation}
 \begin{aligned}
 u(x=0) &= 0, \\
@@ -233,8 +236,9 @@ $I_{yy}$.
 
 \subsection{Applied load}
 
-It is known that the total force acting on a single wing
-of the aircraft during the $2.5$ g maneuver is
+It is known that the total force acting on a single wing,
+and thus on a single spar, of the aircraft during the $2.5$
+g maneuver is
 \begin{equation}
 F = (2.5)(9.8 \text{m}\text{s}^{-2})(\frac12)(500 \text{kg}) = 6125 \text{N}.
 \end{equation}
@@ -243,11 +247,11 @@ spar is given as
 \begin{equation}
 F = \int_0 ^L q(x) dx,
 \end{equation}
-the area under the curve in Figure \ref{fig:load}, which
+the area under the curve in Figure \ref{fig:load} which
 forms a triangular region. From geometry, we have $F = \frac12 h L$,
-where $h$ is the height of the triangle. Thus, the height
-of the triangular region is given as $h = \frac{2F}{L}$.
-Using the well-known formula for a straight line, we conclude that
+where $h$ is the height of the triangle. This implies that
+$h = \frac{2F}{L}$.
+Using the formula for a straight line, we conclude that
 the expression for the force-per unit area is
 \begin{equation}
 q(x) = \frac{2F}{L} \left( 1 - \frac{x}{L} \right).
@@ -256,16 +260,16 @@ The Matlab function CalcForce.m returns the value
 of the force per-unit area $q(x)$ at discrete $x$
 locations.
 
-\subsection{Second moment of inertia at cross sections}
+\subsection{Second moment of inertia}
 
 As mentioned previously, the cross-section of the spar
 geometry in the $xz$ plane is a circular annulus
 (see Figure \ref{fig:annulus}). The second moment
-of inertia for an annulus is give by the equation:
+of inertia for an annulus is given by the equation:
 \begin{equation}
 I_{yy} = \iint z^2 \text{d} z \text{d} y.
 \end{equation}
-Basic calculus lead to the result:
+Basic calculus leads to the result:
 \begin{equation}
 I_{yy} = \frac{\pi}{4} \left ( (r^o)^4 - (r^i)^4 \right).
 \end{equation}
@@ -277,7 +281,7 @@ of $I_{yy}$ at discrete $x$-locations along the spar.
 The model PDE \eqref{eq:pde} is solved with a finite
 element method using Hermite cubic shape functions.
 The domain is consistently discretized with the geometry
-representation, where $N_x-1$ elements are used. The 
+representation, where $N_x-1$ elements are used. The interval
 $[0,L]$ is split into the discrete points
 $\{ x_0, x_1, x_2, \dots, x_{N_x} \}$, where the $j^{th}$
 element is defined over the interval $x_{j+1} - x_j$.
@@ -307,13 +311,13 @@ where $V^o_j$ denotes the volume of the truncated cone
 defined by the values of the spar's outer
 radii values at $x_j$ and $x_{j+1}$
 \begin{equation}
-V^o_j = \frac{\pi \Delta x}{3} ((r^o_j)^2 + (r^o_{j+1})^2 + (r^o_j)(r^o_{j+1})).
+V^o_j = \frac{\pi \Delta x}{3} ((r^o_j)^2 + (r^o_{j+1})^2 + (r^o_j)(r^o_{j+1})),
 \end{equation}
-Similarly, $V^i_j$ denotes the volume of the truncated cone
+and $V^i_j$ denotes the volume of the truncated cone
 defined by the values of the spar's inner
-radii values at $x_j$ and $x_{j+1}$.
+radii values at $x_j$ and $x_{j+1}$
 \begin{equation}
-V^i_j = \frac{\pi \Delta x}{3} ((r^i_j)^2 + (r^i_{j+1})^2 + (r^i_j) (r^i_{j+1}))
+V^i_j = \frac{\pi \Delta x}{3} ((r^i_j)^2 + (r^i_{j+1})^2 + (r^i_j) (r^i_{j+1})).
 \end{equation}
 Naturally, the difference $V^o_j-V^i_j$ denotes the
 total volume associated with the element defined
@@ -331,7 +335,8 @@ values at discrete grid locations.
 
 \subsection{Optimization problem statement}
 
-Using the previous definition of the spar's mass $m$, the
+Using the previous definition of the spar's mass $m$ and the
+definition of the parameter vector $\bs{p}$, the
 optimization problem of interest can be stated:
 \begin{equation}
 \begin{aligned}
@@ -358,7 +363,9 @@ the yield strength $Y$ and is implemented as a nonlinear
 constraint in ConstraintStress.m. Note that we have scaled
 this nonlinear constraint by dividing both sides by the
 yield strength $Y$ so that all constraints are closer
-to the same order of magnitude.
+to the same order of magnitude. Additionally, note that
+nonlinear constraint is dependent on the stress results
+$\sigma_j$ obtained from the finite element analysis.
 
 \subsection{Optimization methods}
 
@@ -392,8 +399,12 @@ This can be seen on line $46$ of Driver.m.
 \section{Results}
 
 The program Driver.m was run as it is currently presented
-in the appendix and output the convergence history shown
-in Figure \ref{fig:convergence}.
+in the Appendix. We choose the initial guess $\bs{p}_0$ to
+optimization algorithm such that $r^o = 5$ cm and $r^i = 4.635$ cm
+at all grid points. We refer to the geometry configuration defined
+by this initial guess as the \emph{nominal} geometry.
+The convergence history for the optimization
+problem is shown in Figure \ref{fig:convergence}.
 
 \begin{figure}[hbt]
 \small
@@ -428,6 +439,21 @@ in Figure \ref{fig:convergence}.
 \end{minipage}
 \end{figure}
 
+The cross-section of the geometry in the $xz$-plane
+for the nominal geometry and for the optimal
+geometry are shown in Figures \ref{fig:nominal_geom}
+and \ref{fig:optimal_geom}, respectively.
+We note that the thickness of the spar is smaller for
+the optimal geometry than for the nominal geometry
+at nearly all span-wise locations. This is congruent
+with the design intuition that the optimal geometry
+should use the least amount of material, while still
+satisfying the minimum thickness constraint. Additionally,
+the inner and outer radii constraints, $r^i \geq 1$ cm
+and $r^o \leq 5$ cm, respectively, are clearly
+satisfied, further increasing our confidence that
+the optimal geometry has been found.
+
 \begin{figure}[hbt]
 \centering
 \begin{minipage}[b]{0.4\textwidth}
@@ -442,9 +468,45 @@ in Figure \ref{fig:convergence}.
 \end{minipage}
 \end{figure}
 
+Similarly, the stress distributions obtained when the
+load $q(x)$ is applied to the nominal geometry and to
+the optimal geometry are shown in Figures
+\ref{fig:nominal_stress} and \ref{fig:optimal_stress},
+respectively. Again, the results for the stress
+distribution align with the engineering intuition
+that the material should be pushed to its yield
+strength $Y = 600$ MPa, but no further. The stress
+distribution along the $x$-axis begins to decrease
+at around $5$ m because, at this point, the
+inner radii constraint has been met, and can get
+no smaller.
+
+As a final verification step, we have modified the gradient
+output $g$ of the method Obj.m to simply return a
+gradient vector with each component set to the value $1$.
+This greatly affected the optimization convergence
+process (as one would expect), and gives us confidence
+that Matlab's \emph{fmincon} routine is actually
+utilizing the supplied gradient found via the complex-step
+method rather than using
+its own internal finite difference scheme.
+
+Finally, we note that the computed mass of the
+optimal spar geometry is found to be
+$4.91$ kg. This is about a  $62$ percent
+reduction over the nominal mass value of $13.26$ kg.
+
 \section{Conclusions}
 
-Some words here
+In conclusion, we have used constrained gradient based
+optimization to determine the geometry of a
+wing spar. The spar is optimal in the sense that its
+geometry minimizes the mass of the spar, and thus
+its weight, subject to various engineering assumptions
+and constraints. We have made use of the accurate
+complex-step method within our optimization algorithm.
+The optimal geometry saw a $62$ percent reduction
+in mass when compared to a nominal geometry.
 
 \newpage
 
