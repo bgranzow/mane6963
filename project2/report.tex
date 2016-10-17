@@ -5,6 +5,7 @@
 \usepackage{listings}
 \usepackage{color}
 \usepackage{graphicx}
+\usepackage{subcaption}
 \usepackage[margin=1.0in]{geometry}
 
 \lstdefinestyle{matlab-style}{
@@ -52,8 +53,8 @@ stepnumber=1
 \begin{figure}[hbt]
 \centering
 \includegraphics[width=0.6\textwidth]{spar}
-\label{fig:spar}
 \caption{Wing (dotted lines) and illustration of spar geometry}
+\label{fig:spar}
 \end{figure}
 
 In this report, we investigate the optimal design of a
@@ -89,7 +90,7 @@ acting on the spar is shown in Figure \ref{fig:load}.
 
 We assume that the wing semi-span $L$ is $7.5$ m,
 and that the spar supporting the wing will be made
-of a composite fiber material. The material properties
+of a carbon fiber composite material. The material properties
 of the composite are listed in Figure \ref{fig:materials}.
 Additionally, we assume that the cross-section of
 the spar in the $yz$ plane is a circular annulus,
@@ -111,16 +112,16 @@ Ultimate yield strength $(Y)$ & $600$ MPa \\ \hline
 \subsection{Engineering design constraints}
 
 Due to material manufacturing constraints, we
-assume that the inner radius of the spar at all
-points is greater than or equal to $1$ cm, $r^i \geq 1$ cm,
+assume that the inner radius of the spar $r^i$ at all
+points along the $x$-axis is greater than or equal to $1$ cm
 and that the inner and outer radii of the spar cannot be
-more than $2.5$mm apart, $r^o - r^i \geq 2.5$ mm.
+more than $2.5$mm apart.
 Because the spar must remain within the wing, we
-constrain the outer radius of the spar to be less
-than or equal to $5$ cm, $r^o \leq 5$ cm.
-Finally, we stipulate that the normal stress at all
-span-wise locations in the be less than the yield
-strength, $\sigma \leq Y$, to maintain a safe design.
+constrain the outer radius $r^o$ of the spar to be less
+than or equal to $5$ cm.
+Finally, we stipulate that the normal stress $\sigma$ at all
+span-wise locations be less than the yield
+strength $Y$, to maintain a safe design.
 
 \begin{figure}[hbt]
 \centering
@@ -135,7 +136,7 @@ To achieve the stated optimization goal subject to the above
 constraints and assumptions, we have:
 \begin{itemize}
 \item Determined a suitable spar geometry parameterization,
-defined by the design vector $\bs{p}$.
+defined by a design vector $\bs{p}$.
 \item Derived the appropriate force per unit length function
 $q(x)$ based on our design assumptions and implemented a Matlab
 method CalcForce.m that evaluates $q(x)$ at discrete points.
@@ -144,12 +145,12 @@ the second moment of area at cross-sections of the spar geometry.
 \item Provided the functions CalcForce.m and CalcMoment.m to a
 finite element analysis code to compute the normal stresses
 $\sigma$ at discrete grid locations along the spar.
-\item Implemented the Matlab routine CalcMass.m that computes
+\item Implemented the Matlab routine CalcMass.m to compute
 the mass $m$ of the spar as a function of the design variables
 $\bs{p}$.
-\item Implemented the Matlab routine Obj.m which computes the
-mass objective function and its gradient with respect to the
-design parameters $\bs{p}$ using the complex-step method.
+\item Implemented the Matlab routine Obj.m to compute the
+mass objective function, as well as its gradient using
+the complex-step method.
 \item Implemented the Matlab routines ConstraintLower.m,
 ConstraintUpper.m, and ConstraintStress.m to effectively
 impose the necessary constraints.
@@ -225,8 +226,8 @@ $I_{yy}$.
 
 \subsection{Applied load}
 
-It is known that the total force acting on the aircraft
-during the $2.5$ g maneuver is
+It is known that the total force acting on a single wing
+of the aircraft during the $2.5$ g maneuver is
 \begin{equation}
 F = (2.5)(9.8 \text{m}\text{s}^{-2})(\frac12)(500 \text{kg}) = 6125 \text{N}.
 \end{equation}
@@ -284,30 +285,118 @@ where $V^o_j$ denotes the volume of the truncated cone
 defined by the values of the spar's outer
 radii values at $x_j$ and $x_{j+1}$
 \begin{equation}
-{V^o}_j = \frac{\pi \Delta x}{3} ((r^o_j)^2 + (r^o_{j+1})^2 + (r^o_j)(r^i_{j+1})).
+V^o_j = \frac{\pi \Delta x}{3} ((r^o_j)^2 + (r^o_{j+1})^2 + (r^o_j)(r^i_{j+1})).
 \end{equation}
 Similarly, $V^i_j$ denotes the volume of the truncated cone
 defined by the values of the spar's inner
 radii values at $x_j$ and $x_{j+1}$.
 \begin{equation}
-{V^i}_j = \frac{\pi \Delta x}{3} ((r^i_j)^2 + (r^i_{j+1})^2 + (r^i_j) (r^i_{j+1}))
+V^i_j = \frac{\pi \Delta x}{3} ((r^i_j)^2 + (r^i_{j+1})^2 + (r^i_j) (r^i_{j+1}))
 \end{equation}
 Naturally, the difference $V^o_j-V^i_j$ denotes the
 total volume associated with the element defined
-by the points $x_j$ and $x_{j+1}$. The Matlab
+by the points $x_j$ and $x_{j+1}$.
+The mass of the spar is then simply computed
+as the material density $\rho$ times the spar's volume:
+\begin{equation}
+m(\bs{p}) =  \rho V(\bs{p}),
+\end{equation}
+where we have noted the dependence of the mass on the parameter
+vector $\bs{p}$. The Matlab
 function CalcMass.m returns the computed value
 of the spar's mass, given inner and outer radii
 values at discrete grid locations.
 
 \subsection{Optimization problem statement}
 
-
+Using the previous definition of the spar's mass $m$, the
+optimization problem of interest can be stated:
+\begin{equation}
+\begin{aligned}
+& \underset{\bs{p}}{\text{minimize}}
+& & m(\bs{p}) \\
+& \text{subject to}
+& & p_j \geq 0.01,                    &j=1,2,\dots,N_x \\
+&&& p_{N_x+j} \geq 0.0025,            &j=1,2,\dots,N_x\\
+&&& p_j + p_{N_x +j} \leq 0.05,       &j=1,2,\dots,N_x \\
+&&& \sigma_j(\bs{p})/Y \leq 1.0,      &j=1,2,\dots,N_x
+\end{aligned}
+\end{equation}
+Here, we note that the first constraint is the lower bound
+constraint on the inner radius, $r^i \geq 1$ cm. Similarly,
+the second constraint corresponds to the thickness lower
+bound constraint $t \geq 2.5$ mm. These two lower bound
+constraints are implemented in the Matlab routine
+ConstraintLower.m. The third constraint states that the
+outer radius $r^o$ must not exceed $5$ cm, and is implemented
+as a linear inequality constraint in the Matlab function
+ConstraintUpper.m. The final constraint prohibits the
+stress $\sigma$ at all points in the domain from exceeding
+the yield strength $Y$ and is implemented as a nonlinear
+constraint in ConstraintStress.m. Note that we have scaled
+this nonlinear constraint by dividing both sides by the
+yield strength $Y$ so that all constraints are closer
+to the same order of magnitude.
 
 \subsection{Optimization methods}
 
+We utilize gradient based optimization techniques through
+Matlab's \emph{fmincon} routine.
+
+
+
 \section{Results}
 
+\begin{figure}[hbt]
+\small
+\centering
+\begin{verbatim}
+                                                         Norm of First-order
+ Iter F-count            f(x) Feasibility  Steplength        step  optimality
+    0      81    1.325793e+01   0.000e+00                           9.666e+01
+    1     163    6.069926e+00   1.005e+00   7.000e-01   1.396e-01   1.935e+02
+    2     244    4.739209e+00   9.421e-01   1.000e+00   4.977e-02   8.300e+01
+    3     325    4.882532e+00   2.540e-01   1.000e+00   7.966e-03   1.358e+01
+    4     406    4.911249e+00   3.159e-02   1.000e+00   2.263e-03   2.159e+00
+    5     487    4.913408e+00   5.579e-04   1.000e+00   2.811e-04   1.979e-01
+    6     568    4.913433e+00   1.552e-07   1.000e+00   4.732e-06   1.587e-03
+    7     649    4.913433e+00   6.939e-18   1.000e+00   1.186e-09   1.129e-12
+\end{verbatim}
+\caption{Convergence results for geometry optimization}
+\label{fig:convergence}
+\end{figure}
+
+\begin{figure}[hbt]
+\centering
+\begin{minipage}[b]{0.4\textwidth}
+\includegraphics[width=0.9\textwidth]{nominal_geom}
+\caption{Cross-section of nominal spar geometry}
+\label{fig:nominal_geom}
+\end{minipage}
+\begin{minipage}[b]{0.4\textwidth}
+\includegraphics[width=0.9\textwidth]{optimal_geom}
+\caption{Cross-section of optimal spar geometry}
+\label{fig:optimal_geom}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[hbt]
+\centering
+\begin{minipage}[b]{0.4\textwidth}
+\includegraphics[width=0.9\textwidth]{nominal_stress}
+\caption{Nominal stress distribution}
+\label{fig:nominal_stress}
+\end{minipage}
+\begin{minipage}[b]{0.4\textwidth}
+\includegraphics[width=0.9\textwidth]{optimal_stress}
+\caption{Optimal stress distribution}
+\label{fig:optimal_stress}
+\end{minipage}
+\end{figure}
+
 \section{Conclusions}
+
+Some words here
 
 \newpage
 
@@ -323,7 +412,6 @@ values at discrete grid locations.
 \lstinputlisting[style=matlab-style,caption=ConstraintStress.m]{ConstraintStress.m}
 \newpage
 \lstinputlisting[style=matlab-style,caption=Obj.m]{Obj.m}
-\lstinputlisting[style=matlab-style,caption=Plotter.m]{Plotter.m}
 \newpage
 \lstinputlisting[style=matlab-style,caption=Driver.m]{Driver.m}
 
