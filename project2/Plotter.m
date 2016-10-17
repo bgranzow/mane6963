@@ -18,9 +18,19 @@ plot(x,-ro,'k','LineWidth',2)
 plot(x,zeros(length(x),1),'--')
 set(gca, 'FontSize', 20, 'LineWidth', 2)
 title('Cross section of spar geometry')
-legend('inner radius','outer radius')
-xlabel('x')
-ylabel('z')
+legend('inner radius (m)','outer radius (m)')
+xlabel('x (m)')
+ylabel('z (m)')
+axis([0,8,-.055,.055])
+
+figure
+plot(x,sigma,'r','LineWidth',2)
+set(gca, 'FontSize', 20, 'LineWidth', 2)
+title('Normal stress on spar')
+legend('stress (MPa)')
+xlabel('x (m)')
+ylabel('\sigma (MPa)')
+
 
 end
 

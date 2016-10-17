@@ -7,4 +7,4 @@ $(NAME).pdf: $(NAME).tex
 	pdflatex $(NAME)
 
 clean:
-	rm -rf *.log *.aux *.bbl *.blg *.spl $(NAME).pdf
+	rm -rf *.log *.aux *.bbl *.blg *.spl *.toc $(NAME).pdf

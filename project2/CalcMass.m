@@ -25,7 +25,7 @@ V = 0.0;
 for j=1:Nx-1
     Vi = (pi*dx/3.0)*(ri(j)^2 + ri(j+1)^2 + ri(j)*ri(j+1));
     Vo = (pi*dx/3.0)*(ro(j)^2 + ro(j+1)^2 + ro(j)*ro(j+1));
-    V = V + (Vi-Vo);
+    V = V + (Vo-Vi);
 end
 m = rho*V;
 

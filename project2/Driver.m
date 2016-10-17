@@ -27,19 +27,23 @@ r = 0.04635*ones(Nx,1); % nominal values of inner radii
 t = 0.00365*ones(Nx,1); % nominal values of annular thickness
 p0 = [r;t];             % concactenated design vector
 
+% complex step-method step size
+h = 1e-30;
+
 % define anonymous functions to work with
 ri      = @(p) p(1:Nx);
 ro      = @(p) p(1:Nx) + p(Nx+1:2*Nx);
 Iyy     = @(p) CalcMoment(ri(p), ro(p));
 u       = @(p) CalcBeamDisplacement(L, E, Iyy(p), q, Nx-1);
 sigma   = @(p) CalcBeamStress(L, E, ro(p), u(p), Nx-1);
-obj     = @(p) Obj(ri(p), ro(p), rho, L);
+obj     = @(p) Obj(ri(p), ro(p), rho, L, h);
 nlcon   = @(p) ConstraintStress(sigma(p),Y);
 
 % use fmincon to perform gradient based optimization
 optns = optimoptions(@fmincon,...
     'Display','iter',...
-    'Algorithm', 'sqp');
+    'Algorithm', 'sqp',...
+    'GradObj', 'on');
 p = fmincon(obj,p0,A,b,[],[],lbcon,[],nlcon,optns);
 
 % plot some groovy stuff
