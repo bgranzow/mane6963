@@ -201,6 +201,7 @@ beam theory.
 \frac{d^2}{d x^2}
 \left( E I_{yy} \frac{d^2 u}{dx^2} \right) =
 q, \quad \forall x \in [0,L],
+\label{eq:pde}
 \end{equation}
 where $I_{yy}$ is the second moment of inertia of the
 cross-section of the spar and $q$ is an applied load.
@@ -219,6 +220,12 @@ and traction free boundary conditions at the spar tip:
 \frac{d^3 u}{dx^3} (x=L) &= 0.
 \end{aligned}
 \end{equation}
+Here, we have assumed that the material is elastic
+and isotropic, i.e. $E$ does not vary spatially.
+Additionally, we have assumed that the internal
+strain accounts only for deformations due to
+bending moments, and that these deformations are
+small enough to neglect nonlinear effects.
 Before presenting an appropriate numerical method to
 solve this PDE, we first derive analytical expressions
 for the load $q(x)$ and for the second moment of inertia
@@ -267,7 +274,22 @@ of $I_{yy}$ at discrete $x$-locations along the spar.
 
 \subsection{Finite element analysis}
 
-
+The model PDE \eqref{eq:pde} is solved with a finite
+element method using Hermite cubic shape functions.
+The domain is consistently discretized with the geometry
+representation, where $N_x-1$ elements are used. The 
+$[0,L]$ is split into the discrete points
+$\{ x_0, x_1, x_2, \dots, x_{N_x} \}$, where the $j^{th}$
+element is defined over the interval $x_{j+1} - x_j$.
+We assume that the element length $\Delta x = x_{j+1} - x_j$
+is uniform for all elements, $j=1,2,\dots,N_x-1$.
+The previously described methods CalcForce.m and
+CalcMoment.m are utilized by the finite element analysis
+to determine the values of $q(x)$ and $I_{yy}$, respectively,
+at discrete $x_j$ locations. The finite element analysis
+computes the displacements $u_j$ at discrete grid locations.
+These displacements are then post-processed to determine
+the stresses $\sigma_j$ at discrete points.
 
 \section{Optimization methods}
 
@@ -285,7 +307,7 @@ where $V^o_j$ denotes the volume of the truncated cone
 defined by the values of the spar's outer
 radii values at $x_j$ and $x_{j+1}$
 \begin{equation}
-V^o_j = \frac{\pi \Delta x}{3} ((r^o_j)^2 + (r^o_{j+1})^2 + (r^o_j)(r^i_{j+1})).
+V^o_j = \frac{\pi \Delta x}{3} ((r^o_j)^2 + (r^o_{j+1})^2 + (r^o_j)(r^o_{j+1})).
 \end{equation}
 Similarly, $V^i_j$ denotes the volume of the truncated cone
 defined by the values of the spar's inner
@@ -340,12 +362,38 @@ to the same order of magnitude.
 
 \subsection{Optimization methods}
 
+The optimization problem statement is fully encapsulated
+in the Matlab script Driver.m. We utilize $N_x=40$ grid
+points in the finite element analysis to ensure accurate
+results. As a result, there are $N_p=80$ total design
+variables. The Matlab routine Obj.m is a wrapper around
+the method CalcMass.m, that returns the value of the
+mass objective function $m(\bs{p})$ as well as its
+gradient $\nabla m(\bs{p})$, which is computed using
+the complex step method. The complex-step method
+computation begins on line $23$ of Obj.m, and computes the
+components of the gradient in the following manner:
+\begin{equation}
+[ \nabla m(\bs{p}) ]_j = \frac{\text{Im}(m( \bs{p} + i h \bs{e}_j))}{h},
+\quad j=1,2,\dots,N_p,
+\end{equation}
+where $h$ is the chosen-step size for the method. Note
+on line $31$ of Driver.m, we choose this step-size
+to be $h=1e-30$. 
+
 We utilize gradient based optimization techniques through
-Matlab's \emph{fmincon} routine.
-
-
+Matlab's \emph{fmincon} routine. We choose a
+sequentially quadratic programming algorithm.
+Additionally, we ensure that we utilize the gradient
+determined by the complex-step method, rather than
+\emph{fmincon}'s own finite differencing schemes.
+This can be seen on line $46$ of Driver.m.
 
 \section{Results}
+
+The program Driver.m was run as it is currently presented
+in the appendix and output the convergence history shown
+in Figure \ref{fig:convergence}.
 
 \begin{figure}[hbt]
 \small
@@ -370,12 +418,12 @@ Matlab's \emph{fmincon} routine.
 \centering
 \begin{minipage}[b]{0.4\textwidth}
 \includegraphics[width=0.9\textwidth]{nominal_geom}
-\caption{Cross-section of nominal spar geometry}
+\caption{Nominal spar geometry}
 \label{fig:nominal_geom}
 \end{minipage}
 \begin{minipage}[b]{0.4\textwidth}
 \includegraphics[width=0.9\textwidth]{optimal_geom}
-\caption{Cross-section of optimal spar geometry}
+\caption{Optimal spar geometry}
 \label{fig:optimal_geom}
 \end{minipage}
 \end{figure}
