@@ -1,0 +1,80 @@
+\documentclass[11pt]{article}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage[fleqn]{amsmath}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage[margin=1.0in]{geometry}
+
+\lstdefinestyle{matlab-style}{
+language=Matlab,
+basicstyle=\scriptsize\ttfamily,
+tabsize=2,
+rulecolor=,
+language=matlab,
+basicstyle=\scriptsize,
+aboveskip={1.5\baselineskip},
+columns=fullflexible,
+showstringspaces=false,
+extendedchars=true,
+breaklines=true,
+prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+frame=single,
+showtabs=false,
+showspaces=false,
+showstringspaces=false,
+identifierstyle=\ttfamily,
+keywordstyle=\color[rgb]{0,0,1},
+commentstyle=\color[rgb]{0.133,0.545,0.133},
+stringstyle=\color[rgb]{0.627,0.126,0.941},
+keepspaces=true,
+numbers=left,
+numbersep=5pt,
+numberstyle=\tiny\color[rgb]{0.5,0.5,0.5},
+stepnumber=1
+}
+
+\newcommand{\bs}[1] {\boldsymbol{#1}}
+
+\title{Mandating fun on a tilt-o-whirl\\MANE 6963 - Project 3}
+\author{ID: 2168}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Math}
+
+\begin{equation}
+\frac{d}{d \tau}
+\begin{bmatrix}
+y_1\\
+y_2
+\end{bmatrix}
+=
+\begin{bmatrix}
+F(y_1, y_2) \\
+y_1
+\end{bmatrix},
+\end{equation}
+%
+where
+%
+\begin{equation}
+F(y_1, y_2) =
+(\gamma / Q_0) y_1 +
+(\epsilon - \gamma^2 \alpha) \sin (y_2) +
+\gamma^2 \beta \cos(y_2),
+\end{equation}
+%
+and the following variables are defined as:
+$y_1 = \frac{d \phi}{d \tau}$, $y_2 = \phi$,
+$\alpha = \alpha_0 - \alpha_1 \cos \tau$,
+$\beta = 3 \alpha_1 \sin \tau$,
+$\epsilon = \frac{r_1}{9 r_2}$,
+$\gamma = \frac{1}{3 \omega} \sqrt{g / r_2}$.
+
+\end{document}
