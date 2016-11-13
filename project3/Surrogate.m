@@ -41,7 +41,7 @@ end
 covfunc = {@covMaterniso, 1};
 hyp.cov = log([1/4; 1.0]);
 likfunc = @likGauss;
-sn = 0.05;
+sn = 0.025;
 hyp.lik = log(sn);
 hyp = minimize(hyp,@gp,-100,@infExact,[],covfunc,likfunc,x,y);
 

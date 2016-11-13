@@ -14,7 +14,7 @@ covfunc = {@covMaterniso, 1};
 likfunc = @likGauss;
 
 % evaluate the gaussian process.
-[f s2] = gp(hyp, @infExact, [], covfunc, likfunc, x, y, p);
+f= gp(hyp, @infExact, [], covfunc, likfunc, x, y, p);
 
 end
 

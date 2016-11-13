@@ -1,5 +1,5 @@
 % fixed input values
-Tf = 1000;                  % final nondimensional integration time.
+Tf = 2000;                  % final nondimensional integration time.
 a0 = 0.036;                 % incline offset.
 r1 = 4.3;                   % base platform beam radius.
 
@@ -10,8 +10,8 @@ a1 = 0.058;                 % incline angle.
 p0 = [omega r2 a1];
 
 % set up the design space
-lb = [pi/10.0 0.1 0.0];     % parameter lower bounds.
-ub = [4.0*pi/15.0 1.5 0.3]; % parameter upper bounds.
+lb = [0.3 0.1 0.0];         % parameter lower bounds.
+ub = [0.8 1.5 0.3];         % parameter upper bounds.
 Ns = 100;                   % number of samples.
 
 % build the surrogate model
