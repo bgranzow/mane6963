@@ -37,13 +37,14 @@ Iyy     = @(p) CalcMoment(ri(p), ro(p));
 u       = @(p) CalcBeamDisplacement(L, E, Iyy(p), q, Nx-1);
 sigma   = @(p) CalcBeamStress(L, E, ro(p), u(p), Nx-1);
 obj     = @(p) Obj(ri(p), ro(p), rho, L, h);
-nlcon   = @(p) ConstraintStress(sigma(p),Y);
+nlcon   = @(p) ConstraintStress(p,sigma,Y,h);
 
 % use fmincon to perform gradient based optimization
 optns = optimoptions(@fmincon,...
     'Display','iter',...
     'Algorithm', 'sqp',...
-    'GradObj', 'on');
+    'GradObj', 'on',...
+    'GradConst', 'on');
 p = fmincon(obj,p0,A,b,[],[],lbcon,[],nlcon,optns);
 
 % plot some groovy stuff
