@@ -2,7 +2,7 @@
 % function [sigma] = Obj(Tf,r1,r2,a0,a1,omega)
 % Computes the standard deviation objective function.
 % Inputs:
-%   Tf - final non-dimnsional time.
+%   Tf - final non-dimensional time.
 %   r1 - base platform arm radius.
 %   r2 - car platform arm radius.
 %   a0 - incline offset.

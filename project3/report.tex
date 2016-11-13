@@ -38,7 +38,7 @@ stepnumber=1
 
 \newcommand{\bs}[1] {\boldsymbol{#1}}
 
-\title{Mandating fun on a tilt-o-whirl\\MANE 6963 - Project 3}
+\title{Mandating fun on a tilt-o-whirl : MANE 6963 - Project 3}
 \author{ID: 2168}
 \date{}
 
@@ -55,6 +55,13 @@ about a central platform. Our objective is to maximize
 the standard deviation of the angular velocity of each
 car on the platform, which is thought to increase
 the unpredictability and thus fun of the ride.
+Figure \ref{fig:ride} depicts various variables
+associated with the tilt-o-whirl ride design.
+The physical meaning of these variables is described
+in table \ref{table:variables}. Using these variables,
+the objective function we would like to maximize is
+written as $f = \sigma(d \phi / d t)$, where $\sigma$
+denote the standard deviation.
 
 \begin{figure}[hbt!]
 \centering
@@ -74,15 +81,224 @@ the unpredictability and thus fun of the ride.
 \centering
 \includegraphics[width=.99\linewidth]{ride4}
 \end{subfigure}
-\caption{Tilt-o-whirl ride diagrams}
+\caption{Tilt-o-whirl ride diagrams \cite{chaos}}
 \label{fig:ride}
 \end{figure}
 
+\begin{table}[hbt!]
+\centering
+\begin{tabular}{c | c}
+parameter name & description \\ \hline \hline
+$\theta$ & angle defining platform location \\ \hline
+$\omega$ & angular velocity of the base \\ \hline
+$\alpha$ & angle to describe tilt of car platform \\ \hline
+$\beta$ & angle to describe tilt of car platform \\ \hline
+$r_1$ & base arm radius \\ \hline
+$r_2$ & radius to car pivot point \\ \hline
+$\phi$ & angle defining car location \\ \hline
+$\frac{d \phi}{d t}$ & car angular velocity \\ \hline
+\end{tabular}
+\caption{Parameters used to describe tilt-o-whirl motion}
+\label{table:variables}
+\end{table}
+
+The remainder of this report is structured as follows.
+First, we provide a summary of the analysis method
+used to evaluate the standard deviation of the car's
+angular velocity, which involves the numerical solution
+of a chaotic dynamical system. We then verify the
+solution numerical analysis by comparison to known
+results. Next, we discuss the optimization methods used
+to achieve the optimization goal. Due to the chaotic
+nature of the dynamical ODE, we approximate the actual
+objective function with a surrogate model.
+The construction and verification of this surrogate
+model is discussed. Next, the optimization problem
+is stated and its implementation using the developed
+surrogate model is discussed. Finally, results are
+presented and we conclude that our tilt-o-whirl design
+is sufficiently fun based on comparison to nominal
+values. All code developed for this project is listed
+in the appendix.
+
 \section{Analysis methods}
 
-\subsection{Analysis verification}
+\subsection{Model}
+
+As mentioned, the motion of the car platform can be
+predicted via a chaotic, dynamical ODE. Following
+Kautz and Huggard \cite{chaos}, this ODE can be
+expressed as:
+%
+\begin{equation}
+\frac{d^2 \phi}{d \tau^2} +
+(\gamma / Q_0) \frac{d \phi} {d \tau} +
+(\epsilon - \gamma^2 \alpha) \sin \phi +
+(\gamma^2 \beta) \cos \phi,
+\end{equation}
+%
+where $\tau = 3 \omega t$ is a non-dimensional time
+parameter, $\gamma = \frac{1}{3 \omega} \sqrt{g/r_2}$
+and $\epsilon = \frac{r_1}{9 r_2}$ are dimensionless
+parameters, and $Q_0$ is a parameter chosen to be fixed
+at the value $20$. This second order ODE can be written
+as a system of first order ODEs by introducing the
+variables $y_1 = \frac{d \phi}{d \tau}$, $y_2 = \phi$.
+The system of ODEs is written as:
+%
+\begin{equation}
+\frac{d}{d \tau}
+\begin{bmatrix}
+y_1\\
+y_2
+\end{bmatrix}
+=
+\begin{bmatrix}
+F(y_1, y_2) \\
+y_1
+\end{bmatrix},
+\end{equation}
+%
+where
+%
+\begin{equation}
+F(y_1, y_2) =
+(\gamma / Q_0) y_1 +
+(\epsilon - \gamma^2 \alpha) \sin (y_2) +
+\gamma^2 \beta \cos(y_2),
+\end{equation}
+
+Using the time-dependent solution
+$y_1 = \frac{d \phi} {d \tau}$,
+the standard deviation objective function can be
+computed as:
+%
+\begin{equation}
+\sigma = 3 \omega
+\sqrt{ \frac{1}{T} \int_0^T (y_1 - \bar{y}_1)^2 \text{d} \tau},
+\label{eq:obj}
+\end{equation}
+%
+where $\bar{y}_1 = \frac{1}{T} \int_0^T y_1 \text{d} \tau$,
+and $T$ is the final non-dimensional integration time.
+Finally, we note that the parameter $\alpha$ can be
+expressed as $\alpha = \alpha_0 - \alpha_1 \cos \tau$,
+where $\alpha_0$ is an angle offset coefficient
+and $\alpha_1$ is associated with the incline angle.
+
+\subsection{Implementation and verification}
+
+The ODE driving function $F$ is implemented in the
+code \textsc{F.m}, and the computation of the objective
+function is implemented by \textsc{Obj.m}. To verify
+the analysis code, we choose the nominal parameter
+values $a^n_0 = 0.036$ rad, $a^n_1 = 0.058$ rad,
+$r^n_1 = 4.3$ m, $r^n_2 = 0.8$ m, and
+$\omega^n = 6.25 \frac{2 \pi}{60}$ rad s$^{-1}$.
+Additionally, we choose
+a final non-dimensional integration of $T = 2000$.
+Note on line 18 of \textsc{Obj.m}, we determine initial
+conditions for the ODE solve by performing a 'spin-up'
+solve, where the ODE system is solved with zero initial
+conditions over $5$ percent of the total integration time.
+The Matlab routine \textsc{ode45} is utilized to solve
+the ODE system.
+
+\begin{figure}[hbt!]
+\centering
+\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[width=.99\linewidth]{verify}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[width=.99\linewidth]{compare}
+\end{subfigure}
+\caption{Objective function evaluated at nominal
+parameters versus $\omega$ using the developed code (left)
+and a known working analysis code (right).}
+\label{fig:verify}
+\end{figure}
+
+Figure \ref{fig:verify} shows results
+obtained from the analysis routines implemented for this
+project as compared to a known working analysis code.
+The results agree qualitatively and quantitatively
+and lead us to believe that the analysis code has
+been implemented correctly.
+ALSO NEED TO SAY SOMETHING ABOUT WHEN $\omega << 1$ etc..
 
 \section{Optimization methods}
+
+To achieve a fun tilt-o-whirl design, we choose the
+following parameter vector $p \in \mathbb{R}^3$ such that
+%
+\begin{equation}
+p = [ \omega,  r_2,  \alpha_1 ]^T,
+\end{equation}
+%
+and we fix the variables $r_1 = 4.3$ m
+and $\alpha_0 = 0.036$ rad.
+Further, we are interested in the bounded design space
+defined by the bounds:
+%
+\begin{equation}
+\begin{aligned}
+3 \; \text{rpm} & \leq && \omega \frac{2 \pi}{60} &&\leq 8 \; \text{rpm} \\
+0.1 \; \text{m} & \leq && r_2 &&\leq 1.5 \; \text{m} \\
+0 \; \text{rad} & \leq && \alpha_1 &&\leq 0.3 \; \text{rad}
+\label{eq:bounds}
+\end{aligned}
+\end{equation}
+%
+Presumably the upper bounds are set so that we don't
+break children's necks.
+
+\subsection{Surrogate model}
+
+Due to the chaotic nature of the ODE system that is embedded in
+the objective function and the fact that the objective function
+is relatively expensive to compute directly, we construct a
+surrogate model to approximate the objective function. We begin
+this construction by randomly selecting $N_s = 100$ design sample
+locations in the domain defined by the bounds \eqref{eq:bounds}.
+This sampling is achieved with Latin Hypercube Sampling (LHS)
+on line 32 of \textsc{Surrogate.m}. Figure \ref{fig:lhs}
+illustrates one potential sampling of the design space using
+LHS.
+
+\begin{figure}[hbt!]
+\centering
+\includegraphics[width=.5\linewidth]{designspace}
+\caption{Example design space sampling with LHS}
+\label{fig:lhs}
+\end{figure}
+
+Next, we determine the hyper-parameters for our surrogate
+model using the \textsc{GPML} library. These hyper-parameters
+are the output of the method \textsc{Surrogate.m}. To `train'
+the surrogate model to select the hyper-parameters, we
+choose a Gaussian likelihood function as seen on line
+45 of \textsc{Surrogate.m}, and a Mat\'{e}rn covariance
+function as seen on line 41 of \textsc{Surrogate.m}.
+Finally, in the training of our surrogate model, we allow
+for some noise in the data by selecting the parameter
+$s_n = 0.025$, as seen on line 44 of \textsc{Surrogate.m}
+
+\subsection{Surrogate model verification}
+
+To verify the construction of the
+
+\begin{figure}[hbt!]
+\centering
+\includegraphics[width=.5\linewidth]{Verify2}
+\caption{Surrogate model sampling with nominal values}
+\label{fig:surrogate}
+\end{figure}
+
+
+
+\subsection{Optimization problem statement}
 
 \section{Results}
 
@@ -121,37 +337,23 @@ ans =
    -2.3145
 \end{verbatim}
 
-\section{Conclusion}
+\section{Conclusions}
 
-\section{Math}
+\begin{thebibliography}{1}
+\bibitem{chaos} Kautz, R. L., and Bret M. Huggard.
+"Chaos at the amusement park: Dynamics of the Tilt‐A‐Whirl."
+\emph{American journal of physics} 62.1 (1994): 59-66.
+\end{thebibliography}
 
-\begin{equation}
-\frac{d}{d \tau}
-\begin{bmatrix}
-y_1\\
-y_2
-\end{bmatrix}
-=
-\begin{bmatrix}
-F(y_1, y_2) \\
-y_1
-\end{bmatrix},
-\end{equation}
-%
-where
-%
-\begin{equation}
-F(y_1, y_2) =
-(\gamma / Q_0) y_1 +
-(\epsilon - \gamma^2 \alpha) \sin (y_2) +
-\gamma^2 \beta \cos(y_2),
-\end{equation}
-%
-and the following variables are defined as:
-$y_1 = \frac{d \phi}{d \tau}$, $y_2 = \phi$,
-$\alpha = \alpha_0 - \alpha_1 \cos \tau$,
-$\beta = 3 \alpha_1 \sin \tau$,
-$\epsilon = \frac{r_1}{9 r_2}$,
-$\gamma = \frac{1}{3 \omega} \sqrt{g / r_2}$.
+\newpage
 
+\section{Appendix : code listings}
+
+\lstinputlisting[style=matlab-style,caption=F.m]{F.m}
+\newpage
+\lstinputlisting[style=matlab-style,caption=Obj.m]{Obj.m}
+\newpage
+\lstinputlisting[style=matlab-style,caption=Surrogate.m]{Surrogate.m}
+\newpage
+\lstinputlisting[style=matlab-style,caption=Verify.m]{Verify.m}
 \end{document}
