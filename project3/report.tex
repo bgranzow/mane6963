@@ -174,7 +174,7 @@ the standard deviation objective function can be
 computed as:
 %
 \begin{equation}
-\sigma = 3 \omega
+f = 3 \omega
 \sqrt{ \frac{1}{T} \int_0^T (y_1 - \bar{y}_1)^2 \text{d} \tau},
 \label{eq:obj}
 \end{equation}
@@ -231,16 +231,15 @@ ALSO NEED TO SAY SOMETHING ABOUT WHEN $\omega << 1$ etc..
 \section{Optimization methods}
 
 To achieve a fun tilt-o-whirl design, we choose the
-following parameter vector $p \in \mathbb{R}^3$ such that
+following parameter vector $\bs{p} \in \mathbb{R}^3$ such that
 %
 \begin{equation}
-p = [ \omega,  r_2,  \alpha_1 ]^T,
+\bs{p} = [ \omega,  r_2,  \alpha_1 ]^T,
 \end{equation}
 %
-and we fix the variables $r_1 = 4.3$ m
-and $\alpha_0 = 0.036$ rad.
-Further, we are interested in the bounded design space
-defined by the bounds:
+and we fix the variables $r_1 = r_1^n$
+and $\alpha_0 = \alpha_0^n$. Further, we are interested
+in the bounded design space defined by the bounds:
 %
 \begin{equation}
 \begin{aligned}
@@ -284,6 +283,9 @@ function as seen on line 41 of \textsc{Surrogate.m}.
 Finally, in the training of our surrogate model, we allow
 for some noise in the data by selecting the parameter
 $s_n = 0.025$, as seen on line 44 of \textsc{Surrogate.m}
+Once the hyper-parameters are found, a surrogate Gaussian
+process model $\tilde{f}$ is fully defined that
+approximates the objective function $f$.
 
 \subsection{Surrogate model verification}
 
@@ -296,9 +298,21 @@ To verify the construction of the
 \label{fig:surrogate}
 \end{figure}
 
-
-
 \subsection{Optimization problem statement}
+
+Given the surrogate Gaussian process, the optimization
+problem statement becomes:
+\begin{equation}
+\begin{aligned}
+& \underset{\bs{p}}{\text{minimize}}
+& & \tilde{f}(\bs{p}) \\
+& \text{subject to}
+& & p_j \geq 0.01,                    &j=1,2,\dots,N_x \\
+&&& p_{N_x+j} \geq 0.0025,            &j=1,2,\dots,N_x\\
+&&& p_j + p_{N_x +j} \leq 0.05,       &j=1,2,\dots,N_x \\
+&&& \sigma_j(\bs{p})/Y \leq 1.0,      &j=1,2,\dots,N_x
+\end{aligned}
+\end{equation}
 
 \section{Results}
 
