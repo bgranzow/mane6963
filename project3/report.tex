@@ -58,7 +58,7 @@ the unpredictability and thus fun of the ride.
 Figure \ref{fig:ride} depicts various variables
 associated with the tilt-o-whirl ride design.
 The physical meaning of these variables is described
-in table \ref{table:variables}. Using these variables,
+in Table \ref{table:variables}. Using these variables,
 the objective function we would like to maximize is
 written as $f = \sigma(d \phi / d t)$, where $\sigma$
 denote the standard deviation.
@@ -225,8 +225,14 @@ obtained from the analysis routines implemented for this
 project as compared to a known working analysis code.
 The results agree qualitatively and quantitatively
 and lead us to believe that the analysis code has
-been implemented correctly.
-ALSO NEED TO SAY SOMETHING ABOUT WHEN $\omega << 1$ etc..
+been implemented correctly. Additionally, we performed
+the ODE solve to the final time $T$ using
+$\omega \ll 1$ and $\omega \gg 1$. We observed that,
+when $\omega \ll 1$, the solution $\phi$ exhibits
+stable periodic behavior time, and when $\omega \gg 1$,
+the solution $\phi$ exhibits chaotic unpredictable
+behavior throughout its time evolution. This agrees
+with the conclusions of \cite{chaos}.
 
 \section{Optimization methods}
 
@@ -285,11 +291,18 @@ for some noise in the data by selecting the parameter
 $s_n = 0.025$, as seen on line 44 of \textsc{Surrogate.m}
 Once the hyper-parameters are found, a surrogate Gaussian
 process model $\tilde{f}$ is fully defined that
-approximates the objective function $f$.
+approximates the objective function $f$. The Gaussian
+process surrogate is sampled using the implemented
+routine \textsc{OptObj.m}.
 
 \subsection{Surrogate model verification}
 
-To verify the construction of the
+To verify the construction of the surrogate model,
+we sample the surrogate model evaluated at the nominal
+variable values while parameter $\omega$. Figure
+\ref{fig:surrogate} shows a comparison of the surrogate
+objective value $\tilde{f}$ versus the analysis objective
+value $f$ as the parameter $\omega$ varies.
 
 \begin{figure}[hbt!]
 \centering
@@ -307,15 +320,23 @@ problem statement becomes:
 & \underset{\bs{p}}{\text{minimize}}
 & & \tilde{f}(\bs{p}) \\
 & \text{subject to}
-& & p_j \geq 0.01,                    &j=1,2,\dots,N_x \\
-&&& p_{N_x+j} \geq 0.0025,            &j=1,2,\dots,N_x\\
-&&& p_j + p_{N_x +j} \leq 0.05,       &j=1,2,\dots,N_x \\
-&&& \sigma_j(\bs{p})/Y \leq 1.0,      &j=1,2,\dots,N_x
+& & 3 \; \text{rpm} \leq p_1 \frac{2 \pi}{60} \leq \; 8 \text{rpm}, \\
+&&& 0.1 \; \text{m} \leq p_2 \leq 1.5 \; \text{rpm}, \\
+&&& 0 \; \text{rad} \leq p_3 \leq 0.3 \; \text{rad}\\
 \end{aligned}
 \end{equation}
 
 \section{Results}
 
+The construction of the surrogate model and the optimization
+problem is encapsulated entirely in the script \textsc{Driver.m}.
+We utilize Matlab's \textsc{fmincon} routine with default tolerances
+to perform gradient-based optimization on the surrogate objective
+function. The initial guess for the optimization routine is given
+by the nominal design parameters. The convergence history of the
+optimization routine is shown below:
+
+{ \scriptsize
 \begin{verbatim}
  Norm of First-order
  Iter F-count            f(x) Feasibility  Steplength        step  optimality
@@ -337,21 +358,28 @@ problem statement becomes:
    15      83   -4.932950e+00   0.000e+00   1.000e+00   1.574e-05   4.258e-04
    16      87   -4.932950e+00   0.000e+00   1.000e+00   3.167e-06   2.909e-05
    17      91   -4.932950e+00   0.000e+00   1.000e+00   4.304e-07   4.768e-06
-\end{verbatim}
+\end{verbatim} }
 
+The optimal parameters were found to be:
+{ \scriptsize
 \begin{verbatim}
-p =
-
-    0.7760    0.1762    0.2261
-
->> (1.488281-4.932950)/1.488281
-
-ans =
-
-   -2.3145
-\end{verbatim}
+p = 0.7760    0.1762    0.2261
+\end{verbatim} }
+Comparing to the nominal value of the objective function evaluated
+using the surrogate model, we see that these parameters
+result in a $231.45$ increase in the standard deviation
+objective.
 
 \section{Conclusions}
+
+For this design project, we have optimized the standard
+deviation of the angular velocity of a tilt-o-whirl car.
+Because this objective function is chaotic, we have
+approximated it with a surrogate model using the
+\textsc{GPML} library. Using gradient-based optimization
+on the surrogate model, we have found design parameters
+that increase the objective by $231$ percent.
+Fun will be had for everyone.
 
 \begin{thebibliography}{1}
 \bibitem{chaos} Kautz, R. L., and Bret M. Huggard.
@@ -369,5 +397,19 @@ ans =
 \newpage
 \lstinputlisting[style=matlab-style,caption=Surrogate.m]{Surrogate.m}
 \newpage
+\lstinputlisting[style=matlab-style,caption=OptObj.m]{OptObj.m}
 \lstinputlisting[style=matlab-style,caption=Verify.m]{Verify.m}
+\newpage
+\lstinputlisting[style=matlab-style,caption=Driver.m]{Driver.m}
+
 \end{document}
+
+\begin{verbatim}
+>> (1.488281-4.932950)/1.488281
+
+ans =
+
+   -2.3145
+\end{verbatim}
+
+
