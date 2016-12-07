@@ -1,8 +1,10 @@
-  function [c,ceq,dcdp,dceqdp] = StressConstraints(p,L,E,Y,q,Nx)
-% function [c,ceq,dcdp,dceqdp] = StressConstraints(p,L,E,Y,q,Nx)
+  function [c,ceq,dcdp,dceqdp] = StressConstraints(p,pts,wts,w,L,E,Y,Nx)
+% function [c,ceq,dcdp,dceqdp] = StressConstraints(p,pts,wts,w,L,E,Y,Nx)
 % Computes nonlinear stress constraints
 % Inputs:
 %  p - [2*Nx,1] design vector
+%  pts - [81,4] stochastic collocation integration points
+%  wts - [81,1] stochatstic collocation integration weights
 %  L - Length of spar domain
 %  E - Elastic modulus
 %  Y - Yield strength
@@ -29,11 +31,11 @@ dcdp = dcdp.';
 
       function c = ineq(p)
           ri = p(1:Nx);
-          ro = p(1:Nx) + p(Nx+1:2*Nx);
+          ro = ri + p(Nx+1:2*Nx);
           Iyy = (pi/4.0).*(ro.^4-ri.^4);
-          u = CalcBeamDisplacement(L,E,Iyy,q,Nx-1);
-          sigma = CalcBeamStress(L,E,ro,u,Nx-1);
-          c = sigma./Y - 1.0;
+          [exp, var] = CalcStress(pts,wts,ro,Iyy,w,L,E,Nx);
+          std = sqrt(var - exp.*exp);
+          c = (exp + 6*std)./Y - 1.0;
       end
 
 end

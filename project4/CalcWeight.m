@@ -19,7 +19,7 @@ end
 
       function f = weight(p)
           ri = p(1:Nx);
-          ro = p(1:Nx) + p(Nx+1:2*Nx);
+          ro = ri + p(Nx+1:2*Nx);
           y = ro.^2 - ri.^2;
           f = trapz(y)*pi*rho*L/(Nx-1);
       end
