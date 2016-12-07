@@ -192,12 +192,12 @@ where $X = [-\infty,\infty]^4$ and $P(\cdot,\cdot,\cdot)$ denotes
 the random variables' probability density function.
 As mentioned previously, the mean $\mu_n$ for each random variable
 is $0$ and
-the standard deviation $\sigma$ for each random variable
+the standard deviation $\sigma_n$ for each random variable
 is given as $\sigma_n = \frac{F_{\text{nom}}(0)}{10n}$.
 The variance of the stress is given as
 %
 \begin{equation}
-\text{Var}[s] = \text{E}(s^2) - \text{E}(s)^2.
+\text{Var}[s] = \text{E}[s^2] - \text{E}[s]^2.
 \end{equation}
 
 \section{Geometry parameterization}
@@ -332,8 +332,8 @@ where $\hat{w_i}$ and $\hat{\xi}_i$ are the standard
 Gauss-Hermite integration weights and points and
 $\mu$ and $\sigma$ are mean and standard deviation, respectively,
 corresponding to the chosen random variable.
-These weights are pre-computed on line 36 of \emph{Driver.m}
-using the routine \emph{CalcQPs.m} and stored in an array of
+These weights and points are pre-computed on line 36 of \emph{Driver.m}
+using the routine \emph{CalcQPs.m} and are stored in arrays of
 length $81$ for performance reasons.
 Note that to compute the expectation of the stress and the
 square of the stress, we must perform the finite element
@@ -356,12 +356,15 @@ Jacobian as:
 \quad k=1,2,\dots,2N_x
 \end{equation}
 %
-on lines 25-26 of \emph{StressConstraints.m}.
+on lines 25-26 of \emph{StressConstraints.m},
+where the step-size $h$ is chosen to be
+$h = 1e-30$.
 
 \section{Results}
 
 We choose the initial design guess to be the nominal
-values $r^i_j = 0.0415$ m and $t_j = 0.0085$ m.
+values $r^i_j = 0.0415$ m and $t_j = 0.0085$ m for
+$j=1,2,\dots,N-x$.
 We choose $N_x = 20$ grid points for the finite
 element analysis, so that there a total of $2 N_x$
 design variables.
@@ -376,14 +379,14 @@ stochastic collocation routines.
 %
 \begin{figure}[hbt!]
 \centering
-\begin{minipage}[b]{0.55\textwidth}
-\includegraphics[width=0.9\textwidth]{nominal_stress}
-\caption{Computed stress values}
+\begin{minipage}[b]{0.5\textwidth}
+\includegraphics[width=0.95\textwidth]{nominal_stress}
+\caption{Computed nominal stresses}
 \label{fig:nominal_stress}
 \end{minipage}%
-\begin{minipage}[b]{0.45\textwidth}
-\includegraphics[width=0.9\textwidth]{nominal_stress_hicken}
-\caption{Known stress values}
+\begin{minipage}[b]{0.5\textwidth}
+\includegraphics[width=0.8\textwidth]{nominal_stress_hicken}
+\caption{Known nominal stresses}
 \label{fig:nominal_stress_hicken}
 \end{minipage}
 \end{figure}
@@ -412,10 +415,11 @@ achieving our desired optimization goal.
 \end{figure}
 
 Figure \ref{fig:nominal_geom} shows the nominal spar geometry
-and Figure \ref{fig:optimal_geom} shows the found optimal spar
+and Figure \ref{fig:optimal_geom} shows the computed optimal spar
 geometry. Notice that the optimal spar is quite thick towards
 its junction with the fuselage of the plane and tapers down
-slowly along the length of the spar.
+gradually along the length of the spar until the minimum
+thickness constraint is reached.
 %
 \begin{figure}[hbt!]
 \centering
@@ -436,9 +440,10 @@ for the optimal spar, as well as the mean stress plus or minus
 six standard deviations. It is immediately clear that the
 nonlinear stress constraint has been satisfied, where the
 mean stress plus six standard deviations is at all points
-along the spar less than the yield stress $Y$, again leading
-to confidence that we have solved the optimization problem
-correctly.
+along the spar less than the yield stress $Y$. This leads
+to further confidence that
+we have solved the optimization problem
+correctly, and is congruent with the engineering intuition.
 %
 \begin{figure}[hbt!]
 \centering
@@ -451,7 +456,8 @@ correctly.
 
 We have investigated the optimal design of a wing
 spar under uncertain loading conditions. Using
-stochastic collocation, we have minimized the mass of
+gradient-based optimization with 
+stochastic collocation techniques, we have minimized the mass of
 the wing spar so that normal stresses along spar are
 considered safe during a variety of loading conditions.
 The optimal geometry's mass was found to be over 70
