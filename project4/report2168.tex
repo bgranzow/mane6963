@@ -1,0 +1,78 @@
+\documentclass[10pt]{article}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage[fleqn]{amsmath}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage[margin=1.0in]{geometry}
+
+\lstdefinestyle{matlab-style}{
+language=Matlab,
+basicstyle=\scriptsize\ttfamily,
+tabsize=2,
+rulecolor=,
+language=matlab,
+basicstyle=\scriptsize,
+aboveskip={1.5\baselineskip},
+columns=fullflexible,
+showstringspaces=false,
+extendedchars=true,
+breaklines=true,
+prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+frame=single,
+showtabs=false,
+showspaces=false,
+showstringspaces=false,
+identifierstyle=\ttfamily,
+keywordstyle=\color[rgb]{0,0,1},
+commentstyle=\color[rgb]{0.133,0.545,0.133},
+stringstyle=\color[rgb]{0.627,0.126,0.941},
+keepspaces=true,
+numbers=left,
+numbersep=5pt,
+numberstyle=\tiny\color[rgb]{0.5,0.5,0.5},
+stepnumber=1
+}
+
+\newcommand{\bs}[1] {\boldsymbol{#1}}
+
+\title{Optimizing a wing spar under uncertaintity \\MANE 6963 - Project 3}
+\author{ID: 2168}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Executive summary}
+
+\section{Results}
+
+\begin{verbatim}
+ Iter F-count            f(x) Feasibility  Steplength        step  optimality
+    0       1    2.932048e+01   0.000e+00                           1.984e+02
+    1       3    1.032301e+01   1.611e+00   7.000e-01   8.323e-02   6.197e+02
+    2       4    7.908339e+00   1.496e+00   1.000e+00   3.763e-02   3.860e+02
+    3       5    8.404552e+00   4.704e-01   1.000e+00   1.359e-02   6.832e+01
+    4       6    8.559594e+00   8.094e-02   1.000e+00   5.516e-03   9.968e+00
+    5       7    8.574724e+00   3.297e-03   1.000e+00   8.917e-04   2.276e+00
+    6       8    8.574903e+00   5.853e-06   1.000e+00   2.931e-05   9.966e-02
+    7       9    8.574903e+00   1.878e-11   1.000e+00   4.824e-08   4.693e-05
+\end{verbatim}
+
+\newpage
+
+\section{Appendix : code listings}
+
+\lstinputlisting[style=matlab-style,caption=CalcWeight.m]{CalcWeight.m}
+\lstinputlisting[style=matlab-style,caption=CalcQPs.m]{CalcQPs.m}
+\newpage
+\lstinputlisting[style=matlab-style,caption=StressConstraints.m]{StressConstraints.m}
+\newpage
+\lstinputlisting[style=matlab-style,caption=Plotter.m]{Plotter.m}
+\newpage
+\lstinputlisting[style=matlab-style,caption=Driver.m]{Driver.m}
+
+\end{document}
