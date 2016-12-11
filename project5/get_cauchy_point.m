@@ -7,9 +7,12 @@
 % Inputs:
 %  x - [n,1] The design vector at the iteration k.
 %  g - [n,1] The objective gradient at the iteration k.
-%  W - [n,m] BFGS matrix container.
-%  M - [m,m] BFGS matrix container.
-%  theta - Positive BFGS scaling parameter.
+%  W - [n,m] LBFGS matrix container.
+%  M - [m,m] LBFGS matrix container.
+%  theta - Positive LBFGS scaling parameter.
+% Outputs:
+%  xc - [n,1] The generalized Cauchy point.
+%  c - [m,1] Initialization vector for the subspace minimization.
 % ====
 
 % get necessary intermediate variables
@@ -34,39 +37,42 @@ b = idx(i);
 t = tt(b);
 dt = t - t_old;
 
-%{
 % examine subsequent segments
-while ((dt_min > dt)&&(i<n))
+while ((dt_min > dt)&&(i<=n))
   if (d(b) > 0)
-    xc(b) = ub(b);
+    xc(b) = u(b);
   elseif (d(b) < 0)
-    xc(b) = lb(b);
+    xc(b) = l(b);
   end
   zb = xc(b) - x(b);
   c = c + dt*p;
   WbT = W(1,:);
-  f_prime = f_prime + dt*f_dprime + g(b)*g(b) + theta*g(b)*zb - ...
+  f_prime = f_prime + ...
+    dt*f_dprime + ...
+    g(b)*g(b) + ...
+    theta*g(b)*zb - ...
     g(b)*WbT*(M*c);
-  f_dprime = f_dprime - theta*g(b)*g(b) - 2.0*(g(b)*transpose(WbT)*(M*p)) - ...
+  f_dprime = f_dprime -...
+    theta*g(b)*g(b) - ...
+    2.0*(g(b)*transpose(WbT)*(M*p)) - ...
     g(b)*g(b)*WbT*(M*WbT);
   p = p + g(b)*WbT;
   d(b) = 0.0;
   dt_min = -f_prime / f_dprime;
   t_old = t;
   i = i+1;
-  if (i < n)
+  if (i <= n)
     b = idx(i);
     t = tt(b);
     dt = t - t_old;
   end
 end
-%}
 
 % updates
 dt_min = max(dt_min,0);
 t_old = t_old + dt_min;
-for i=1:n
-  xc(idx(i)) = x(idx(i)) + t_old*d(idx(i));
+for ii=i:n
+  xc(idx(ii)) = x(idx(ii)) + t_old*d(idx(ii));
 end
 c = c + dt_min*p;
 

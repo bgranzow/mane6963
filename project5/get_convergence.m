@@ -12,7 +12,7 @@
 % ====
 
 P = do_projection(x-g,l,u);
-infnorm = abs(max(P-x));
+infnorm = max(abs(P-x));
 
 end
 
